@@ -264,7 +264,7 @@ const setProgramFilter = () => {
     programs.forEach((program) => {
         program.addEventListener('click', (e) => {
             e.preventDefault();
-            const value = program.getAttribute('filter-filter-program');
+            const value = program.getAttribute('filter-program');
             if(!select.hasOwnProperty('program')){
                 select['program'] = value;
                 searchByIncludes(program, value, 'program');
