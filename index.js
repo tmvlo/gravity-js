@@ -1,4 +1,3 @@
-
 let intervalState;
 const selectedFilter = {};
 const select = {};
@@ -53,7 +52,8 @@ const blockOrHidden = (element, textSearch, valueToSearch) => {
 }
 
 const searchByIncludes = (element, value, searchBy = 'topic') => {
-    const allFieldTopics = resultListFilter.length > 0 ? resultListFilter : document.querySelectorAll(`[filter-field="${searchBy}"]`);
+    const allFieldTopics = resultListFilter.length > 0 ? resultListFilter : document.querySelectorAll(`[filter-field="${searchBy}"]:not(.w-dyn-bind-empty)`);
+    resultListFilter = [];
     allFieldTopics.forEach((element) => {
         if (Array.isArray(allFieldTopics)) {
             const l = element.querySelectorAll(`[filter-field="${searchBy}"]`);
@@ -67,7 +67,7 @@ const searchByIncludes = (element, value, searchBy = 'topic') => {
 }
 
 const renewFilter = () => {
-    const { topic, fee, location, program } = select;
+    const { topic, fee, location, program, search } = select;
     const allSpeakers = document.querySelectorAll('.collection-list-search .w-dyn-item');
     resultListFilter = [];
 
@@ -77,11 +77,13 @@ const renewFilter = () => {
         const currentSubTopic = speaker.querySelector('[filter-field="subtopic"]');
         const currentLocation = speaker.querySelector('[filter-field="location"]');
         const currentFee = speaker.querySelector('.wrapper-fee');
+        const currentProgram = speaker.querySelector('[filter-field="program"]')
+        const currentName = speaker.querySelector('.item-data .link-11')
 
         if (topic) { pass = currentTopic.innerText.includes(topic) || currentSubTopic.innerText.includes(topic); }
 
         if (fee && pass) {
-            const numberRange = convertToRange(currentFee);
+            const numberRange = convertToRange(fee);
             const rangeValues = currentFee.querySelectorAll('[filter-field]:not(.w-dyn-bind-empty)');
             if (!numberRange.hasOwnProperty('showAny')) {
                 const specificRanges = [...rangeValues].map((element) => element.innerText.trim());
@@ -93,7 +95,13 @@ const renewFilter = () => {
 
         if (location && pass) { pass = currentLocation.innerText.includes(location); }
 
-        if (program && pass) { }
+        if (program && pass) { pass = currentProgram.innerText.includes(program); }
+
+        if(search && pass ) { 
+            const expresion = new RegExp(`${search}.*`, "i");
+            const name = currentName?.innerText;
+            pass = expresion.test(name);
+        }
 
         if (pass) {
             speaker.style.display = 'block';
@@ -214,10 +222,7 @@ const setFeeFilter = () => {
                 select['fee'] = number;
                 renewFilter();
             }
-
             setSelected('fee-label', 'fee', number);
-
-
         });
     });
 }
@@ -258,6 +263,26 @@ const setLocationFilter = () => {
     setEventClick();
 }
 
+const setProgramFilter = () => {
+
+    const programs = document.querySelectorAll('.label-program');
+    
+    programs.forEach((program) => {
+        program.addEventListener('click', (e) => {
+            e.preventDefault();
+            const value = program.getAttribute('filter-program');
+            if(!select.hasOwnProperty('program')){
+                select['program'] = value;
+                searchByIncludes(program, value, 'program');
+            } else {
+                select['program'] = value;
+                renewFilter();
+            }
+            setSelected('program-label', 'program', value);
+        });
+    })
+}
+
 const setCloseFilters = () => {
     const allBtns = document.querySelectorAll('[data-property]');
 
@@ -277,6 +302,34 @@ const setCloseFilters = () => {
     })
 }
 
+const setInputSearch = () => {
+    const inputSearch = document.querySelector('.text-field-7.w-input');
+    let timeOut;
+
+    inputSearch?.addEventListener('keyup', (e) => {
+        clearTimeout(timeOut);
+
+        timeOut = setTimeout(()=> {
+            select['search'] = inputSearch.value;
+            renewFilter();
+        }, 200)
+    });
+}
+
+const setEventCloseTab = () => {
+    const tabs = document.querySelectorAll('.tab-link-filters');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(tab.classList.contains('w--current')){
+                setTimeout(() => {
+                    hiddenTabs.click();
+                }, 50)
+            }
+        });
+    });
+}
+
 intervalState = setInterval(() => {
     if (document.readyState === 'complete') {
         clearInterval(intervalState)
@@ -284,6 +337,9 @@ intervalState = setInterval(() => {
         setTopicsFilter();
         setFeeFilter();
         setLocationFilter();
+        setProgramFilter();
+        setInputSearch();
         setCloseFilters();
+        setEventCloseTab();
     }
 }, 100);
