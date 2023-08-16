@@ -214,10 +214,7 @@ const setFeeFilter = () => {
                 select['fee'] = number;
                 renewFilter();
             }
-
             setSelected('fee-label', 'fee', number);
-
-
         });
     });
 }
