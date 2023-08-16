@@ -308,21 +308,10 @@ const setInputSearch = () => {
 
     inputSearch?.addEventListener('keyup', (e) => {
         clearTimeout(timeOut);
-        
+
         timeOut = setTimeout(()=> {
-            const allSpeakers = resultListFilter.length > 0 && inputSearch.value ? resultListFilter : document.querySelectorAll('.collection-list-search .w-dyn-item');
-            resultListFilter = [];
-            allSpeakers.forEach((element) => {
-                const expresion = new RegExp(`${inputSearch.value}.*`, "i");
-                const name = element.querySelector('.item-data .link-11')?.innerText;
-                if(expresion.test(name)){
-                    element.style.display = 'block';
-                    resultListFilter.push(element);
-                } else {
-                    element.style.display = 'none';   
-                }
-            })
             select['search'] = inputSearch.value;
+            renewFilter();
         }, 200)
     });
 }
