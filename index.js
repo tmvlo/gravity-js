@@ -69,7 +69,7 @@ const searchByIncludes = (element, value, searchBy = 'topic') => {
 const renewFilter = () => {
     const { topic, fee, location, program } = select;
     const allSpeakers = document.querySelectorAll('.collection-list-search .w-dyn-item');
-    resultListFilterp = [];
+    resultListFilter = [];
 
     allSpeakers.forEach((speaker) => {
         let pass = true;
@@ -81,8 +81,8 @@ const renewFilter = () => {
         if (topic) { pass = currentTopic.innerText.includes(topic) || currentSubTopic.innerText.includes(topic); }
 
         if (fee && pass) {
-            const numberRange = convertToRange(fee);
-            const rangeValues = range.querySelectorAll('[filter-field]:not(.w-dyn-bind-empty)');
+            const numberRange = convertToRange(currentFee);
+            const rangeValues = currentFee.querySelectorAll('[filter-field]:not(.w-dyn-bind-empty)');
             if (!numberRange.hasOwnProperty('showAny')) {
                 const specificRanges = [...rangeValues].map((element) => element.innerText.trim());
                 pass = isWithinAnyOfTheRanges(numberRange, specificRanges);
@@ -175,20 +175,46 @@ const setFeeFilter = () => {
             const numberRange = convertToRange(number);
             let specificRanges = [];
 
-            const specificRangeElements = document.querySelectorAll('.wrapper-fee');
-            specificRangeElements.forEach((range) => {
-                const rangeValues = range.querySelectorAll('[filter-field]:not(.w-dyn-bind-empty)');
-                if (!numberRange.hasOwnProperty('showAny')) {
-                    specificRanges = [...rangeValues].map((element) => element.innerText.trim());
-                    if (isWithinAnyOfTheRanges(numberRange, specificRanges)) {
-                        range.closest('.w-dyn-item').style.display = "block";
+            if (!select.hasOwnProperty('fee')) {
+                select['fee'] = number;
+                const specificRangeElements = resultListFilter.length > 0 ? resultListFilter : document.querySelectorAll('.wrapper-fee');
+                resultListFilter = [];
+                specificRangeElements.forEach((range) => {
+                    if (Array.isArray(range)) {
+                        const currentFee = range.querySelector('.wrapper-fee');
+                        const rangeValues = currentFee.querySelectorAll('[filter-field]:not(.w-dyn-bind-empty)');
+                        if (!numberRange.hasOwnProperty('showAny')) {
+                            specificRanges = [...rangeValues].map((element) => element.innerText.trim());
+                            if (isWithinAnyOfTheRanges(numberRange, specificRanges)) {
+                                range.style.display = "block";
+                                resultListFilter.push(range);
+                            } else {
+                                range.style.display = "none";
+                            }
+                        } else {
+                            range.style.display = "block";
+                            resultListFilter.push(range)
+                        }
                     } else {
-                        range.closest('.w-dyn-item').style.display = "none";
+                        const rangeValues = range.querySelectorAll('[filter-field]:not(.w-dyn-bind-empty)');
+                        if (!numberRange.hasOwnProperty('showAny')) {
+                            specificRanges = [...rangeValues].map((element) => element.innerText.trim());
+                            if (isWithinAnyOfTheRanges(numberRange, specificRanges)) {
+                                range.closest('.w-dyn-item').style.display = "block";
+                            } else {
+                                range.closest('.w-dyn-item').style.display = "none";
+                            }
+                        } else {
+                            range.closest('.w-dyn-item').style.display = "block";
+                        }
                     }
-                } else {
-                    range.closest('.w-dyn-item').style.display = "block";
-                }
-            });
+
+                });
+            } else {
+                select['fee'] = number;
+                renewFilter();
+            }
+
             setSelected('fee-label', 'fee', number);
 
 
