@@ -54,6 +54,7 @@ const blockOrHidden = (element, textSearch, valueToSearch) => {
 
 const searchByIncludes = (element, value, searchBy = 'topic') => {
     const allFieldTopics = resultListFilter.length > 0 ? resultListFilter : document.querySelectorAll(`[filter-field="${searchBy}"]`);
+    resultListFilter = [];
     allFieldTopics.forEach((element) => {
         if (Array.isArray(allFieldTopics)) {
             const l = element.querySelectorAll(`[filter-field="${searchBy}"]`);
@@ -77,6 +78,7 @@ const renewFilter = () => {
         const currentSubTopic = speaker.querySelector('[filter-field="subtopic"]');
         const currentLocation = speaker.querySelector('[filter-field="location"]');
         const currentFee = speaker.querySelector('.wrapper-fee');
+        const currentProgram = speaker.querySelector('[filter-field="program"]')
 
         if (topic) { pass = currentTopic.innerText.includes(topic) || currentSubTopic.innerText.includes(topic); }
 
@@ -93,7 +95,7 @@ const renewFilter = () => {
 
         if (location && pass) { pass = currentLocation.innerText.includes(location); }
 
-        if (program && pass) { }
+        if (program && pass) { pass = currentProgram.innerText.includes(program); }
 
         if (pass) {
             speaker.style.display = 'block';
@@ -255,6 +257,26 @@ const setLocationFilter = () => {
     setEventClick();
 }
 
+const setProgramFilter = () => {
+
+    const programs = document.querySelectorAll('.label-program');
+    
+    programs.forEach((program) => {
+        program.addEventListener('click', (e) => {
+            e.preventDefault();
+            const value = program.getAttribute('filter-filter-program');
+            if(!select.hasOwnProperty('program')){
+                select['program'] = value;
+                searchByIncludes(program, value, 'program');
+            } else {
+                select['program'] = value;
+                renewFilter();
+            }
+            setSelected('program-label', 'program', value);
+        });
+    })
+}
+
 const setCloseFilters = () => {
     const allBtns = document.querySelectorAll('[data-property]');
 
@@ -281,6 +303,7 @@ intervalState = setInterval(() => {
         setTopicsFilter();
         setFeeFilter();
         setLocationFilter();
+        setProgramFilter();
         setCloseFilters();
     }
 }, 100);
