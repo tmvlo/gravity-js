@@ -190,6 +190,7 @@
                 });
                 setSelected('fee-label', 'fee', number);
 
+                
             });
         });
     }
