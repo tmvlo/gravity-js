@@ -318,15 +318,16 @@ const setInputSearch = () => {
 
 const setEventCloseTab = () => {
     const tabs = document.querySelectorAll('.tab-link-filters');
+    let s = 0;
     tabs.forEach(tab => {
         tab.addEventListener('click', (e) => {
             e.preventDefault();
-            const ariaSelected = tab.getAttribute('aria-selected')
-            if(tab.classList.contains('w--current') && ariaSelected){
+            if(tab.classList.contains('w--current') && s > 0){
                 setTimeout(() => {
                     hiddenTabs.click();
                 }, 50)
             }
+            s = 1;
         });
     });
 }
