@@ -308,6 +308,7 @@ const setInputSearch = () => {
 
     inputSearch?.addEventListener('keyup', (e) => {
         clearTimeout(timeOut);
+        
         timeOut = setTimeout(()=> {
             const allSpeakers = resultListFilter.length > 0 && inputSearch.value ? resultListFilter : document.querySelectorAll('.collection-list-search .w-dyn-item');
             resultListFilter = [];
