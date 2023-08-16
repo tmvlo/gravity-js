@@ -53,7 +53,7 @@ const blockOrHidden = (element, textSearch, valueToSearch) => {
 }
 
 const searchByIncludes = (element, value, searchBy = 'topic') => {
-    const allFieldTopics = resultListFilter.length > 0 ? resultListFilter : document.querySelectorAll(`[filter-field="${searchBy}"]`);
+    const allFieldTopics = resultListFilter.length > 0 ? resultListFilter : document.querySelectorAll(`[filter-field="${searchBy}"]:not(.w-dyn-bind-empty)`);
     resultListFilter = [];
     allFieldTopics.forEach((element) => {
         if (Array.isArray(allFieldTopics)) {
