@@ -321,7 +321,8 @@ const setEventCloseTab = () => {
     tabs.forEach(tab => {
         tab.addEventListener('click', (e) => {
             e.preventDefault();
-            if(tab.classList.contains('w--current')){
+            const ariaSelected = tab.getAttribute('aria-selected')
+            if(tab.classList.contains('w--current') && ariaSelected){
                 setTimeout(() => {
                     hiddenTabs.click();
                 }, 50)
