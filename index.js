@@ -81,7 +81,7 @@ const renewFilter = () => {
         if (topic) { pass = currentTopic.innerText.includes(topic) || currentSubTopic.innerText.includes(topic); }
 
         if (fee && pass) {
-            const numberRange = convertToRange(currentFee);
+            const numberRange = convertToRange(fee);
             const rangeValues = currentFee.querySelectorAll('[filter-field]:not(.w-dyn-bind-empty)');
             if (!numberRange.hasOwnProperty('showAny')) {
                 const specificRanges = [...rangeValues].map((element) => element.innerText.trim());
