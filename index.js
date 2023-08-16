@@ -1,4 +1,3 @@
-
 let intervalState;
 const selectedFilter = {};
 const select = {};
@@ -68,7 +67,7 @@ const searchByIncludes = (element, value, searchBy = 'topic') => {
 }
 
 const renewFilter = () => {
-    const { topic, fee, location, program } = select;
+    const { topic, fee, location, program, search } = select;
     const allSpeakers = document.querySelectorAll('.collection-list-search .w-dyn-item');
     resultListFilter = [];
 
@@ -79,6 +78,7 @@ const renewFilter = () => {
         const currentLocation = speaker.querySelector('[filter-field="location"]');
         const currentFee = speaker.querySelector('.wrapper-fee');
         const currentProgram = speaker.querySelector('[filter-field="program"]')
+        const currentName = speaker.querySelector('.item-data .link-11')
 
         if (topic) { pass = currentTopic.innerText.includes(topic) || currentSubTopic.innerText.includes(topic); }
 
@@ -96,6 +96,12 @@ const renewFilter = () => {
         if (location && pass) { pass = currentLocation.innerText.includes(location); }
 
         if (program && pass) { pass = currentProgram.innerText.includes(program); }
+
+        if(search && pass ) { 
+            const expresion = new RegExp(`${search}.*`, "i");
+            const name = currentName?.innerText;
+            pass = expresion.test(name);
+        }
 
         if (pass) {
             speaker.style.display = 'block';
@@ -296,6 +302,30 @@ const setCloseFilters = () => {
     })
 }
 
+const setInputSearch = () => {
+    const inputSearch = document.querySelector('.text-field-7.w-input');
+    let timeOut;
+
+    inputSearch?.addEventListener('keyup', (e) => {
+        clearTimeout(timeOut);
+        timeOut = setTimeout(()=> {
+            const allSpeakers = resultListFilter.length > 0 && inputSearch.value ? resultListFilter : document.querySelectorAll('.collection-list-search .w-dyn-item');
+            resultListFilter = [];
+            allSpeakers.forEach((element) => {
+                const expresion = new RegExp(`${inputSearch.value}.*`, "i");
+                const name = element.querySelector('.item-data .link-11')?.innerText;
+                if(expresion.test(name)){
+                    element.style.display = 'block';
+                    resultListFilter.push(element);
+                } else {
+                    element.style.display = 'none';   
+                }
+            })
+            select['search'] = inputSearch.value;
+        }, 200)
+    });
+}
+
 intervalState = setInterval(() => {
     if (document.readyState === 'complete') {
         clearInterval(intervalState)
@@ -304,6 +334,7 @@ intervalState = setInterval(() => {
         setFeeFilter();
         setLocationFilter();
         setProgramFilter();
+        setInputSearch();
         setCloseFilters();
     }
 }, 100);
