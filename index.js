@@ -4,7 +4,6 @@ const select = {};
 let resultListFilter = [];
 let hiddenTabs;
 
-
 const setHiddenClick = () => {
     hiddenTabs = document.querySelector('.tab-link-select-programa-2')
 }
@@ -44,6 +43,7 @@ function isWithinAnyOfTheRanges(number, specificRanges) {
 
 const blockOrHidden = (element, textSearch, valueToSearch) => {
     const parentElement = element.closest('.w-dyn-item');
+
     if (!textSearch.includes(valueToSearch)) {
         parentElement.style.display = 'none';
     } else {
@@ -110,7 +110,15 @@ const renewFilter = () => {
         } else {
             speaker.style.display = 'none';
         }
+ 
     })
+
+    if (!topic && !fee && !location && !program && !search ) {
+        allSpeakers.forEach((speaker) => {
+            speaker.style.display = 'none';
+        });
+        document.querySelector('.wrapper-results').classList.add('hidden');
+    } 
 }
 
 const showOrHiddenLabels = (currentLabel, value, remove) => {
@@ -156,7 +164,8 @@ const setTopicsFilter = () => {
                 select['topic'] = value;
                 renewFilter();
             }
-            setSelected('topic-label', 'topic', value)
+            setSelected('topic-label', 'topic', value);
+            updateTotalSpeakers();
         });
     });
 
@@ -171,7 +180,8 @@ const setTopicsFilter = () => {
                 select['topic'] = value;
                 renewFilter();
             }
-            setSelected('topic-label', 'topic', value)
+            setSelected('topic-label', 'topic', value);
+            updateTotalSpeakers();
         });
     });
 }
@@ -224,6 +234,7 @@ const setFeeFilter = () => {
                 renewFilter();
             }
             setSelected('fee-label', 'fee', number);
+            updateTotalSpeakers();
         });
     });
 }
@@ -255,7 +266,8 @@ const setLocationFilter = () => {
                     select['location'] = value;
                     renewFilter();
                 }
-                setSelected('location-label', 'location', value)
+                setSelected('location-label', 'location', value);
+                updateTotalSpeakers();
             });
         })
     }
@@ -280,6 +292,7 @@ const setProgramFilter = () => {
                 renewFilter();
             }
             setSelected('program-label', 'program', value);
+            updateTotalSpeakers();
         });
     })
 }
@@ -299,6 +312,8 @@ const setCloseFilters = () => {
             setTimeout(() => {
                 hidden();
             }, 100);
+
+            updateTotalSpeakers();
         });
     })
 }
@@ -313,6 +328,7 @@ const setInputSearch = () => {
         timeOut = setTimeout(()=> {
             select['search'] = inputSearch.value;
             renewFilter();
+            updateTotalSpeakers();
         }, 200)
     });
 }
@@ -331,6 +347,19 @@ const setEventCloseTab = () => {
             s = 1;
         });
     });
+}
+
+const updateTotalSpeakers = () => {
+    const visibleSpeakers = document.querySelectorAll('.collection-list-search .w-dyn-item:not([style*="none"])');
+    const totalElement = document.querySelector('.total');
+    if (totalElement) {
+        if (visibleSpeakers.length > 0) {
+            totalElement.textContent = visibleSpeakers.length;
+            totalElement.closest('.flex-block').classList.remove('hidden');
+        } else {
+            totalElement.closest('.flex-block').classList.add('hidden');
+        }
+    }
 }
 
 intervalState = setInterval(() => {
