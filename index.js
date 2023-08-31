@@ -350,7 +350,7 @@ const setEventCloseTab = () => {
 }
 
 const updateTotalSpeakers = () => {
-    const visibleSpeakers = document.querySelectorAll('.collection-list-search .w-dyn-item:not([style*="none"])');
+    const visibleSpeakers = resultListFilter;
     const totalElement = document.querySelector('.total');
     if (totalElement) {
         if (visibleSpeakers.length > 0) {
