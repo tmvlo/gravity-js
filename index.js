@@ -4,6 +4,7 @@ const select = {};
 let resultListFilter = [];
 let hiddenTabs;
 
+
 const setHiddenClick = () => {
     hiddenTabs = document.querySelector('.tab-link-select-programa-2')
 }
