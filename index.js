@@ -220,11 +220,13 @@ const setFeeFilter = () => {
                             specificRanges = [...rangeValues].map((element) => element.innerText.trim());
                             if (isWithinAnyOfTheRanges(numberRange, specificRanges)) {
                                 range.closest('.w-dyn-item').style.display = "block";
+                                resultListFilter.push(range);
                             } else {
                                 range.closest('.w-dyn-item').style.display = "none";
                             }
                         } else {
                             range.closest('.w-dyn-item').style.display = "block";
+                            resultListFilter.push(range);
                         }
                     }
 
@@ -352,12 +354,15 @@ const setEventCloseTab = () => {
 const updateTotalSpeakers = () => {
     const visibleSpeakers = resultListFilter;
     const totalElement = document.querySelector('.total');
+    const wrapperSpeakersNotFound = document.querySelector('.wrapper-speaker-not-found');
     if (totalElement) {
         if (visibleSpeakers.length > 0) {
             totalElement.textContent = visibleSpeakers.length;
             totalElement.closest('.flex-block').classList.remove('hidden');
+            wrapperSpeakersNotFound.classList.add('hidden');
         } else {
             totalElement.closest('.flex-block').classList.add('hidden');
+            wrapperSpeakersNotFound.classList.remove('hidden');
         }
     }
 }
