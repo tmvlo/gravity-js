@@ -12,6 +12,17 @@ const hidden = () => {
     hiddenTabs.click();
 }
 
+const getRandomIdx = (idx) => {
+    const returnValues = []
+    while (returnValues.length < 3) {
+      const numberRandom = Math.round(Math.random() * idx);
+      if(!returnValues.includes(numberRandom)){
+        returnValues.push(numberRandom);
+      } 
+    }
+    return returnValues;
+}
+
 function convertToRange(str) {
     if (str.includes("or above")) {
         const number = parseInt(str.replace(/[^0-9]/g, ''));
@@ -117,6 +128,7 @@ const renewFilter = () => {
         allSpeakers.forEach((speaker) => {
             speaker.style.display = 'none';
         });
+
         document.querySelector('.wrapper-results').classList.add('hidden');
     } 
 }
@@ -363,6 +375,13 @@ const updateTotalSpeakers = () => {
         } else {
             totalElement.closest('.flex-block').classList.add('hidden');
             wrapperSpeakersNotFound.classList.remove('hidden');
+            const allSpeakers = document.querySelectorAll('.collection-list-search .w-dyn-item');
+            const randoms = getRandomIdx(allSpeakers.length - 1);
+
+            console.log(randoms);
+            randoms.forEach(random => {
+                allSpeakers[random].style.display = 'block';
+            })
         }
     }
 }
