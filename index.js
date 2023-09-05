@@ -2,6 +2,7 @@ let intervalState;
 const selectedFilter = {};
 const select = {};
 let resultListFilter = [];
+let similarSpeakers = [];
 let hiddenTabs;
 
 const setHiddenClick = () => {
@@ -12,15 +13,16 @@ const hidden = () => {
     hiddenTabs.click();
 }
 
-const getRandomIdx = (idx) => {
-    const returnValues = []
-    while (returnValues.length < 3) {
-      const numberRandom = Math.round(Math.random() * idx);
-      if(!returnValues.includes(numberRandom)){
-        returnValues.push(numberRandom);
-      } 
+const setSimilarSpeakers = (pass, speaker) => {
+    if(pass && !similarSpeakers.includes(speaker)){
+        similarSpeakers.push(speaker);
     }
-    return returnValues;
+}
+
+const showSimilarSpeakers = () => {
+    similarSpeakers.slice(0, 3).forEach((similar) => {
+        similar.style.display = 'block';
+    })
 }
 
 function convertToRange(str) {
@@ -52,36 +54,11 @@ function isWithinAnyOfTheRanges(number, specificRanges) {
     });
 }
 
-const blockOrHidden = (element, textSearch, valueToSearch) => {
-    const parentElement = element.closest('.w-dyn-item');
-
-    if (!textSearch.includes(valueToSearch)) {
-        parentElement.style.display = 'none';
-    } else {
-        parentElement.style.display = 'block';
-        resultListFilter.push(parentElement);
-    }
-}
-
-const searchByIncludes = (element, value, searchBy = 'topic') => {
-    const allFieldTopics = resultListFilter.length > 0 ? resultListFilter : document.querySelectorAll(`[filter-field="${searchBy}"]:not(.w-dyn-bind-empty)`);
-    resultListFilter = [];
-    allFieldTopics.forEach((element) => {
-        if (Array.isArray(allFieldTopics)) {
-            const l = element.querySelectorAll(`[filter-field="${searchBy}"]`);
-            l.forEach((currentValue) => {
-                blockOrHidden(currentValue, currentValue.innerText, value)
-            })
-        } else {
-            blockOrHidden(element, element.innerText, value);
-        }
-    });
-}
-
 const renewFilter = () => {
     const { topic, fee, location, program, search } = select;
     const allSpeakers = document.querySelectorAll('.collection-list-search .w-dyn-item');
     resultListFilter = [];
+    similarSpeakers = [];
 
     allSpeakers.forEach((speaker) => {
         let pass = true;
@@ -92,7 +69,11 @@ const renewFilter = () => {
         const currentProgram = speaker.querySelector('[filter-field="program"]')
         const currentName = speaker.querySelector('.item-data .link-11')
 
-        if (topic) { pass = currentTopic.innerText.includes(topic) || currentSubTopic.innerText.includes(topic); }
+        if (topic) { 
+            pass = currentTopic.innerText.includes(topic) || currentSubTopic.innerText.includes(topic); 
+            console.log(pass);
+            setSimilarSpeakers(pass, speaker);
+        }
 
         if (fee && pass) {
             const numberRange = convertToRange(fee);
@@ -103,16 +84,24 @@ const renewFilter = () => {
             } else {
                 pass = true;
             }
+            setSimilarSpeakers(pass, speaker);
         }
 
-        if (location && pass) { pass = currentLocation.innerText.includes(location); }
+        if (location && pass) { 
+            pass = currentLocation.innerText.includes(location);
+            setSimilarSpeakers(pass, speaker);
+        }
 
-        if (program && pass) { pass = currentProgram.innerText.includes(program); }
+        if (program && pass) { 
+            pass = currentProgram.innerText.includes(program);
+            setSimilarSpeakers(pass, speaker);
+        }
 
         if(search && pass ) { 
             const expresion = new RegExp(`${search}.*`, "i");
             const name = currentName?.innerText;
             pass = expresion.test(name);
+            setSimilarSpeakers(pass, speaker);
         }
 
         if (pass) {
@@ -169,13 +158,8 @@ const setTopicsFilter = () => {
         element.addEventListener('click', (e) => {
             e.preventDefault();
             const value = element.getAttribute('filter-topic');
-            if (!select.hasOwnProperty('topic')) {
-                select['topic'] = value;
-                searchByIncludes(element, value);
-            } else {
-                select['topic'] = value;
-                renewFilter();
-            }
+            select['topic'] = value;
+            renewFilter();
             setSelected('topic-label', 'topic', value);
             updateTotalSpeakers();
         });
@@ -185,13 +169,8 @@ const setTopicsFilter = () => {
         element.addEventListener('click', (e) => {
             e.preventDefault();
             const value = element.getAttribute('filter-subtopic');
-            if (!select.hasOwnProperty('topic')) {
-                select['topic'] = value;
-                searchByIncludes(element, value, 'subtopic');
-            } else {
-                select['topic'] = value;
-                renewFilter();
-            }
+            select['topic'] = value;
+            renewFilter();
             setSelected('topic-label', 'topic', value);
             updateTotalSpeakers();
         });
@@ -203,50 +182,8 @@ const setFeeFilter = () => {
     elements.forEach((item) => {
         item.addEventListener('click', (e) => {
             const number = item.getAttribute('filter-fee');
-            const numberRange = convertToRange(number);
-            let specificRanges = [];
-
-            if (!select.hasOwnProperty('fee')) {
-                select['fee'] = number;
-                const specificRangeElements = resultListFilter.length > 0 ? resultListFilter : document.querySelectorAll('.wrapper-fee');
-                resultListFilter = [];
-                specificRangeElements.forEach((range) => {
-                    if (Array.isArray(range)) {
-                        const currentFee = range.querySelector('.wrapper-fee');
-                        const rangeValues = currentFee.querySelectorAll('[filter-field]:not(.w-dyn-bind-empty)');
-                        if (!numberRange.hasOwnProperty('showAny')) {
-                            specificRanges = [...rangeValues].map((element) => element.innerText.trim());
-                            if (isWithinAnyOfTheRanges(numberRange, specificRanges)) {
-                                range.style.display = "block";
-                                resultListFilter.push(range);
-                            } else {
-                                range.style.display = "none";
-                            }
-                        } else {
-                            range.style.display = "block";
-                            resultListFilter.push(range)
-                        }
-                    } else {
-                        const rangeValues = range.querySelectorAll('[filter-field]:not(.w-dyn-bind-empty)');
-                        if (!numberRange.hasOwnProperty('showAny')) {
-                            specificRanges = [...rangeValues].map((element) => element.innerText.trim());
-                            if (isWithinAnyOfTheRanges(numberRange, specificRanges)) {
-                                range.closest('.w-dyn-item').style.display = "block";
-                                resultListFilter.push(range);
-                            } else {
-                                range.closest('.w-dyn-item').style.display = "none";
-                            }
-                        } else {
-                            range.closest('.w-dyn-item').style.display = "block";
-                            resultListFilter.push(range);
-                        }
-                    }
-
-                });
-            } else {
-                select['fee'] = number;
-                renewFilter();
-            }
+            select['fee'] = number;
+            renewFilter();
             setSelected('fee-label', 'fee', number);
             updateTotalSpeakers();
         });
@@ -273,13 +210,8 @@ const setLocationFilter = () => {
             location.addEventListener('click', (e) => {
                 e.preventDefault();
                 const value = location.getAttribute('filter-location');
-                if (!select.hasOwnProperty('location')) {
-                    select['location'] = value;
-                    searchByIncludes(location, value, 'location');
-                } else {
-                    select['location'] = value;
-                    renewFilter();
-                }
+                select['location'] = value;
+                renewFilter();
                 setSelected('location-label', 'location', value);
                 updateTotalSpeakers();
             });
@@ -298,13 +230,9 @@ const setProgramFilter = () => {
         program.addEventListener('click', (e) => {
             e.preventDefault();
             const value = program.getAttribute('filter-program');
-            if(!select.hasOwnProperty('program')){
-                select['program'] = value;
-                searchByIncludes(program, value, 'program');
-            } else {
-                select['program'] = value;
-                renewFilter();
-            }
+
+            select['program'] = value;
+            renewFilter();
             setSelected('program-label', 'program', value);
             updateTotalSpeakers();
         });
@@ -375,13 +303,7 @@ const updateTotalSpeakers = () => {
         } else {
             totalElement.closest('.flex-block').classList.add('hidden');
             wrapperSpeakersNotFound.classList.remove('hidden');
-            const allSpeakers = document.querySelectorAll('.collection-list-search .w-dyn-item');
-            const randoms = getRandomIdx(allSpeakers.length - 1);
-
-            console.log(randoms);
-            randoms.forEach(random => {
-                allSpeakers[random].style.display = 'block';
-            })
+            showSimilarSpeakers();
         }
     }
 }
