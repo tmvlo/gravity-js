@@ -70,7 +70,6 @@ const renewFilter = () => {
         const currentName = speaker.querySelector('.item-data .link-11')
 
         if (topic.length > 0) { 
-            console.log(topic);
             pass = topic.some((element) => { return currentTopic.innerText.includes(element) || currentSubTopic.innerText.includes(element) }); 
             setSimilarSpeakers(pass, speaker);
         }
