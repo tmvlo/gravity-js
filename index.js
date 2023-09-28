@@ -123,22 +123,23 @@ const renewFilter = () => {
     } 
 }
 
-const showOrHiddenLabels = (currentLabel, value, remove) => {
-    currentLabel.forEach((current, idx) => {
-        if (value) current.innerHTML = value;
-        if (idx === 0) {
-            if (remove) current.closest('.wrapper-remove').classList.remove('remove-hidden');
-            else current.closest('.wrapper-remove').classList.add('remove-hidden');
-        } else {
-            if (remove) current.parentElement.classList.remove('hidden');
-            else current.parentElement.classList.add('hidden');
-        }
-    })
+const showOrHiddenLabels = (current, listValue, remove, option) => {
+    if (listValue.length > 0){
+        current.innerHTML = listValue.map((element) => {
+            return `<div class='result-select'>${element}<span class='remove-select-span' data-remove='${element}' data-property='${option}'>X</span></div>`
+        }).join(' ');
+        setCloseFilters();
+    } 
+    if (remove) {
+        current.parentElement.classList.remove('hidden');
+    } else { 
+        current.parentElement.classList.add('hidden');
+    }
 }
 
 const setSelected = (label, option) => {
 
-    const currentOption = select[option].join(', ');
+    const currentOption = select[option];
     selectedFilter[option] = { 'label': label, value: currentOption };
     if (selectedFilter) {
         const wrapperResults = document.querySelector('.wrapper-results');
@@ -146,8 +147,9 @@ const setSelected = (label, option) => {
 
         Object.entries(selectedFilter).forEach(([one, two]) => {
             const { label, value } = two;
-            const currentLabel = document.querySelectorAll(`.${label}`);
-            showOrHiddenLabels(currentLabel, value, true);
+            const currentLabel = document.querySelector(`.${label}`);
+            currentLabel.innerHTML = '';
+            showOrHiddenLabels(currentLabel, value, true, one);
         })
         hidden();
     }
@@ -249,22 +251,22 @@ const setProgramFilter = () => {
 }
 
 const setCloseFilters = () => {
-    const allBtns = document.querySelectorAll('[data-property]');
+    const allBtns = document.querySelectorAll('.remove-select-span');
 
     allBtns.forEach((btn) => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            const { property } = btn.dataset;
-            select[property] = [];
-            delete selectedFilter[property];
-            const currentLabels = document.querySelectorAll(`.${property}-label`);
-            showOrHiddenLabels(currentLabels, null, false);
+            const { property, remove } = btn.dataset;
+            const objectRemove = select[property].filter(( element ) => element != remove );
+            select[property] = objectRemove
+            selectedFilter[property].value = objectRemove;
             renewFilter();
-            setTimeout(() => {
-                hidden();
-            }, 100);
-
             updateTotalSpeakers();
+            if(objectRemove.length === 0) {
+                btn.closest('.w-layout-hflex').classList.add('hidden');
+                delete selectedFilter[property]
+            }
+            btn.parentElement.remove();
         });
     })
 }
@@ -326,7 +328,6 @@ intervalState = setInterval(() => {
         setLocationFilter();
         setProgramFilter();
         setInputSearch();
-        setCloseFilters();
         setEventCloseTab();
     }
 }, 100);
