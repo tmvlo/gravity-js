@@ -1,9 +1,10 @@
 let intervalState;
 const selectedFilter = {};
-const select = { topic: [], fee: [], location: [], program: []};
+let select = { topic: [], fee: [], location: [], program: [], search: ''};
 let resultListFilter = [];
 let similarSpeakers = [];
 let hiddenTabs;
+let inputSearch;
 
 const setHiddenClick = () => {
     hiddenTabs = document.querySelector('.tab-link-select-programa-2')
@@ -56,6 +57,7 @@ function isWithinAnyOfTheRanges(number, specificRanges) {
 
 const renewFilter = () => {
     const { topic, fee, location, program, search } = select;
+    sessionStorage.setItem('searchPrevious',  JSON.stringify(select));
     const allSpeakers = document.querySelectorAll('.collection-list-search .w-dyn-item');
     resultListFilter = [];
     similarSpeakers = [];
@@ -272,7 +274,7 @@ const setCloseFilters = () => {
 }
 
 const setInputSearch = () => {
-    const inputSearch = document.querySelector('.text-field-7.w-input');
+    inputSearch = document.querySelector('.text-field-7.w-input');
     let timeOut;
 
     inputSearch?.addEventListener('keyup', (e) => {
@@ -319,6 +321,21 @@ const updateTotalSpeakers = () => {
     }
 }
 
+const renewSearchPrevious = () => {
+    const getSearchPrevious = sessionStorage.getItem("searchPrevious");
+    if(getSearchPrevious){
+        select = JSON.parse(getSearchPrevious)
+        const { topic, fee, location, program, search } = select;
+        if(topic.length > 0) setSelected('topic-label', 'topic');
+        if(fee.length > 0) setSelected('fee-label', 'fee');
+        if(location.length > 0) setSelected('location-label', 'location');
+        if(program.length > 0) setSelected('program-label', 'program');
+        if(search != '') inputSearch.value = search
+        renewFilter(); 
+        updateTotalSpeakers();
+    }
+}
+
 intervalState = setInterval(() => {
     if (document.readyState === 'complete') {
         clearInterval(intervalState)
@@ -329,5 +346,6 @@ intervalState = setInterval(() => {
         setProgramFilter();
         setInputSearch();
         setEventCloseTab();
+        renewSearchPrevious();
     }
 }, 100);
